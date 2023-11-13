@@ -49,4 +49,18 @@ public class ProductoService implements ProductoDao {
         entityManager.merge(producto);
     }
 
+    @Override
+    public void actualizar(int id, Producto producto) {
+
+        Producto productoActualizar = entityManager.find(Producto.class, id);
+
+        //Actualizo sus propiedades con los nuevos valores
+        productoActualizar.setNombre(productoActualizar.getNombre());
+        productoActualizar.setDescripcion(productoActualizar.getDescripcion());
+        productoActualizar.setPrecio(productoActualizar.getPrecio());
+        productoActualizar.setImagen(productoActualizar.getImagen());
+
+        entityManager.merge(productoActualizar);
+    }
 }
+

@@ -18,4 +18,6 @@ public interface ProductoDao {
     void eliminar(int id);
 
     void registrar(Producto producto);
+
+    void actualizar(int id, Producto producto);
 }

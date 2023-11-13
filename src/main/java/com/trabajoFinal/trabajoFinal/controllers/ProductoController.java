@@ -42,4 +42,11 @@ public class ProductoController {
         productoDao.registrar(producto);
     }
 
+    // Operación para actualizar un producto existente (PUT)
+    @RequestMapping(value = "/api/productos/{id}", method = RequestMethod.PUT)
+    public void actualizarProducto(@PathVariable int id, @RequestBody Producto producto) {
+
+        productoDao.actualizar(id, producto);
+    }
+
 }
