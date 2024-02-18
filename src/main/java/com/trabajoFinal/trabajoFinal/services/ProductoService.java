@@ -2,10 +2,10 @@ package com.trabajoFinal.trabajoFinal.services;
 
 import com.trabajoFinal.trabajoFinal.models.Producto;
 import com.trabajoFinal.trabajoFinal.repository.ProductoRepository;
+import com.trabajoFinal.trabajoFinal.services.Interface.IProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Service

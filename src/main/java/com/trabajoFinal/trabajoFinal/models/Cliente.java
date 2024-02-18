@@ -12,8 +12,8 @@ import javax.persistence.*;
 public class Cliente {
 
     @Id
-    @Column(name = "ID")
-    private Long ID;
+    @Column(name = "usuario_ID")
+    private int usuario_ID;
 
     // Permite que la clave primaria de la entidad Usuario también sea la clave primaria de la entidad actual
     @MapsId

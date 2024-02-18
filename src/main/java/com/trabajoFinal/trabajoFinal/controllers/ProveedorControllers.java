@@ -1,7 +1,7 @@
 package com.trabajoFinal.trabajoFinal.controllers;
 
 import com.trabajoFinal.trabajoFinal.models.Proveedor;
-import com.trabajoFinal.trabajoFinal.services.IProveedorService;
+import com.trabajoFinal.trabajoFinal.services.Interface.IProveedorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

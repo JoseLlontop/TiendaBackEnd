@@ -1,4 +1,4 @@
-package com.trabajoFinal.trabajoFinal.services;
+package com.trabajoFinal.trabajoFinal.services.Interface;
 
 import com.trabajoFinal.trabajoFinal.models.Cliente;
 

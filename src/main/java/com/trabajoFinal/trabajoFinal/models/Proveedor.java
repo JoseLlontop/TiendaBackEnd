@@ -12,11 +12,11 @@ import javax.persistence.*;
 public class Proveedor {
 
     @Id
-    @Column(name = "ID")
-    private Long ID;
+    @Column(name = "usuario_ID")
+    private int usuario_ID;
 
     // Permite que la clave primaria de la entidad Usuario también sea la clave primaria de la entidad actual
-    @MapsId
     @OneToOne(cascade = CascadeType.ALL)
+    @MapsId
     private Usuario usuario;
 }

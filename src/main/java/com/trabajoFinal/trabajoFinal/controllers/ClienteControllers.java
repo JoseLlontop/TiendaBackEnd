@@ -1,7 +1,7 @@
 package com.trabajoFinal.trabajoFinal.controllers;
 
 import com.trabajoFinal.trabajoFinal.models.Cliente;
-import com.trabajoFinal.trabajoFinal.services.IClienteService;
+import com.trabajoFinal.trabajoFinal.services.Interface.IClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

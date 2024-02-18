@@ -1,7 +1,7 @@
 package com.trabajoFinal.trabajoFinal.controllers;
 
 import com.trabajoFinal.trabajoFinal.models.Venta;
-import com.trabajoFinal.trabajoFinal.services.IVentaService;
+import com.trabajoFinal.trabajoFinal.services.Interface.IVentaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
