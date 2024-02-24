@@ -17,6 +17,9 @@ public class VentaControllers {
 
     @PostMapping("/api/ventas")
     public void save(@RequestBody Venta venta){
+
+        System.out.println("venta = " + venta);
+        
         service.save(venta);
     }
 

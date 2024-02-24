@@ -23,4 +23,9 @@ public class ClienteControllers {
     public void save(@RequestBody Cliente cliente) {
         service.save(cliente);
     }
+
+    @GetMapping("/api/clientes/buscar")
+    public int buscarCliente(@RequestParam String nombre, @RequestParam String apellido, @RequestParam String email) {
+        return service.buscarCliente(nombre, apellido, email);
+    }
 }

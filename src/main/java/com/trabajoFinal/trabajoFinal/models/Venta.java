@@ -2,11 +2,13 @@ package com.trabajoFinal.trabajoFinal.models;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 
 @Getter @Setter
+@ToString
 @Entity
 @Table(name = "venta")
 public class Venta {

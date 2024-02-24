@@ -9,4 +9,6 @@ public interface IClienteService {
     List<Cliente> getAll();
 
     void save(Cliente cliente);
+
+    int buscarCliente(String nombre,String apellido,String email);
 }
