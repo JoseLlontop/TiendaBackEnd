@@ -1,12 +1,18 @@
 package com.trabajoFinal.trabajoFinal.controllers;
 
-import com.trabajoFinal.trabajoFinal.models.Persona;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trabajoFinal.trabajoFinal.models.*;
+
 import com.trabajoFinal.trabajoFinal.services.Interface.IJwtService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import javax.crypto.Cipher;
-import javax.swing.*;
-import java.math.BigInteger;
+import org.springframework.web.client.RestTemplate;
+
 import java.security.*;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
@@ -18,52 +24,115 @@ public class JwtControllers {
     @Autowired
     private IJwtService service;
 
-    @PostMapping("/api/desencriptarJwt")
-    public Persona decryptJwt(@RequestBody String jwtEncrypted) /*throws Exception*/ {
+    @Value("${sistema.externo.identificador}")
+    private String clientId;
 
-        /*// Clave pública proporcionada
-        String modulusString = "9BJ0WxXATSJ6KtiSHhglSd3kgc6j5kXLp8sx5hm5KN2Y8H1uygVrPAJGBqPEIgRpMHG8yMFyKh2hXLSnZNLtZ+7c+fMIUYJYARS8f4yxF3CpkMtVW4wJ5Sbg99vIyi8Hi/134QuwU9ghYKiGgaYEvsQo5P9R+y/MiJrclETu5mkUdazs0Sua5+WdnsmJqykVxrfHtgvlavtmhF2B8zUWWOb8zdPgWqzxULt4RHWIasdf6GxzG+XGK+6jyNfb4DpUJQBlHssVGgflNEukoYefTcqx865JeGMeIBJzmxceiD2PrEnDsHHYk8w5/2dAWbnf8Pk19T3CXDDd73MLiPR5xQ==";
-        String exponentString = "AQAB";
+    @Value("${sistema.externo.clave}")
+    private String clientSecret;
 
-        // Convertir la clave pública a BigIntegers
-        byte[] modulusBytes = Base64.getDecoder().decode(modulusString);
-        byte[] exponentBytes = Base64.getDecoder().decode(exponentString);
-        BigInteger modulus = new BigInteger(1, modulusBytes);
-        BigInteger exponent = new BigInteger(1, exponentBytes);
+    @Value("${sistema.renaper.modulo}")
+    private String publicKeyModulus;
 
-        // Crear objeto de clave pública
-        RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(modulus, exponent);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PublicKey publicKey = keyFactory.generatePublic(rsaPublicKeySpec);
+    @Value("${sistema.renaper.exponencial}")
+    private String publicKeyExponent;
 
-        // Inicializar el objeto Cipher con el algoritmo RSA
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.DECRYPT_MODE, publicKey);
+    private static final String RENAPER_API_URL = "https://colosal.duckdns.org:15001/Renaper/api/Auth/loguearJWT";
 
-        // Decodificar y desencriptar el texto JWT
-        byte[] jwtBytes = Base64.getDecoder().decode(jwtEncrypted);
-        byte[] decryptedBytes = cipher.doFinal(jwtBytes);
+    @PostMapping("/api/retornarDatos")
+    public Persona decryptJwt(@RequestBody ParametrosSolicitud parametros) throws Exception {
 
-        // Convertir los bytes desencriptados a String
-        String decryptedJwt = new String(decryptedBytes);
+        String parametroUsuario = parametros.getParametroUsuario();
+        String tipoIngresoSistema = parametros.getTipoIngresoSistema();
 
-        System.out.printf("Texto desencriptado: " + decryptedJwt);
+        System.out.println("parametroUsuario = " + parametroUsuario);
 
-        // Retornar el JWT desencriptado
-        return decryptedJwt;*/
+        System.out.println("Tipo de usuario que ingreso al sistema = " + tipoIngresoSistema);
 
-        String textoDesencriptado = "{ \"nombre\" : \"José\", \"apellido\": \"Llontop\",  \"email\" : \"josellontop100@gmail.com\", \"estadoCrediticio\": \"activa\",  \"vivo\" : true }";
+        //CODIGO RELACIONADO A LA LLAMADA HTTP AL RENAPER
 
-        Persona persona = service.convertirTextoPersona(textoDesencriptado);
-        //Verificación 1
-        System.out.println("persona = " + persona);
+        RestTemplate restTemplate = new RestTemplate();
 
+        // Crear el cuerpo de la solicitud
+        String requestBody = "{\"clientId\":\"" + clientId + "\",\"clientSecret\":\"" + clientSecret + "\",\"authorizationCode\":\"" + parametroUsuario + "\"}";
 
-        Persona personaCompleta = service.asignarTipo(persona);
-        //Verificación 2
-        System.out.println("persona = " + personaCompleta);
+        System.out.println("\nJson a enviar al Renaper = " + requestBody);
+        
+        // Configurar las cabeceras de la solicitud
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        return personaCompleta;
+        // Crear la entidad de solicitud con el cuerpo y las cabeceras
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
+        // Realizar la llamada a la API del Renaper
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(RENAPER_API_URL, requestEntity, String.class);
+
+        // Obtener el cuerpo de la respuesta
+        String responseBody = responseEntity.getBody();
+
+        System.out.println("\nRespuesta del Renaper = " + responseBody);
+
+        //ME QUEDO SOLO EN VALOR DE DATOS:
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(responseBody);
+        String datos = rootNode.get("datos").asText();
+
+        System.out.println("\ndatos incriptados = " + datos);
+
+        System.out.println("modulo = " + publicKeyModulus);
+        System.out.println("exponencial = " + publicKeyExponent + "\n");
+
+        //CÓDIGO RELACIONADO A LA DESENCRIPTACIÓN
+
+        try {
+            // Decodificar el Modulus y el Exponent
+            byte[] modulusBytes = Base64.getDecoder().decode(publicKeyModulus);
+            byte[] exponentBytes = Base64.getDecoder().decode(publicKeyExponent);
+
+            // Crear la clave pública
+            PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(
+                    new java.math.BigInteger(1, modulusBytes),
+                    new java.math.BigInteger(1, exponentBytes)
+            ));
+
+            // Decodificar el payload del JWT
+            Claims jsonDesencriptado = Jwts.parserBuilder()
+                    .setSigningKey(publicKey)
+                    .build()
+                    .parseClaimsJws(datos)
+                    .getBody();
+
+            System.out.println("\nJson Desencriptado = " + jsonDesencriptado + "\n");
+
+            Persona persona = service.convertirJsonAPersona(jsonDesencriptado);
+
+            //Verificación 1
+            System.out.println("\npersona = " + persona);
+
+            Persona personaCompleta = service.asignarTipo(persona, tipoIngresoSistema);
+            //Verificación 2
+            System.out.println("A la persona se le asigno el tipo = " + personaCompleta);
+
+            return personaCompleta;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+    // Método para combinar los bytes del módulo y el exponente
+    private byte[] combineByteArrays(byte[] a, byte[] b) {
+        byte[] result = new byte[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
+
+    // Método para decodificar una cadena base64 URL segura
+    private byte[] parseBase64Url(String base64Url) {
+        String paddedBase64Url = base64Url + "==";
+        return Base64.getUrlDecoder().decode(paddedBase64Url);
     }
 }
