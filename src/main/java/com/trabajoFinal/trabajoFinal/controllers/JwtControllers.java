@@ -6,6 +6,7 @@ import com.trabajoFinal.trabajoFinal.models.*;
 
 import com.trabajoFinal.trabajoFinal.services.Interface.IJwtService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -98,6 +99,7 @@ public class JwtControllers {
             // Decodificar el payload del JWT
             Claims jsonDesencriptado = Jwts.parserBuilder()
                     .setSigningKey(publicKey)
+                    .setAllowedClockSkewSeconds(60) // Permitir un margen de tiempo de 1 minuto
                     .build()
                     .parseClaimsJws(datos)
                     .getBody();
