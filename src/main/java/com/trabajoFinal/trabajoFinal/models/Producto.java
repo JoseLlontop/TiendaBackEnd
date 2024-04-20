@@ -27,4 +27,9 @@ public class Producto {
     @Column(name = "imagen")
     private String imagen;
 
+    //Propiedad auxiliar solo para almacenar momentáneamente la url de la imagen
+    //para luego guardarla en la columna de la tabla imagen
+    @Transient
+    private String imagenURL;
+
 }

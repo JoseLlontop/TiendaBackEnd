@@ -1,70 +1,67 @@
 package com.trabajoFinal.trabajoFinal.services;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.model.Region;
-import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.*;
+import com.amazonaws.util.IOUtils;
+import com.trabajoFinal.trabajoFinal.models.virtualModel.Asset;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.UUID;
 
 @Service
 public class S3Service {
-/*
 
-    @Value("${aws.accessKey}")
-    private String awsAccessKey;
+    private final static String BUCKET ="contenedor-aplicacion-tienda";
 
-    @Value("${aws.secretKey}")
-    private String awsSecretKey;
+    @Autowired
+    private AmazonS3Client s3Client;
 
-    private final static String BUCKET = "contenedor-aplicacion-tienda";
+    //Enviar un objeto al bucket
+    public String putObject(MultipartFile multipartFile) {
 
+        String extension = StringUtils.getFilenameExtension(multipartFile.getOriginalFilename());
+        String key = String.format("%s.%s", UUID.randomUUID(), extension);
 
-    public S3Service(AmazonS3 amazonS3) {
-        this.amazonS3 = amazonS3;
-    }
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentType(multipartFile.getContentType());
 
-    public String uploadFile(MultipartFile file) {
         try {
-            String fileName = file.getOriginalFilename();
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentLength(file.getSize());
-            PutObjectRequest request = new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata);
-            PutObjectResult result = amazonS3.putObject(request);
-            return amazonS3.getUrl(bucketName, fileName).toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Manejo de excepciones
-            return null;
+            PutObjectRequest putObjectRequest = new PutObjectRequest(BUCKET, key, multipartFile.getInputStream(), objectMetadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead);
+
+            s3Client.putObject(putObjectRequest);
+            return key;
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
 
-    public InputStream getImage(String imageName) {
+    //Obtener el objeto desde el bucket
+    public Asset getObject(String key) {
+        S3Object s3Object = s3Client.getObject(BUCKET, key);
+        ObjectMetadata metadata = s3Object.getObjectMetadata();
+
         try {
-            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey);
-            AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                    .withRegion(awsRegion)  // Pasar el nombre de la región como una cadena
-                    .build();
-            S3Object object = amazonS3.getObject(BUCKET, imageName);
-            return object.getObjectContent();
-        } catch (AmazonClientException e) {
-            e.printStackTrace();
-            // Manejar la excepción apropiadamente
-            return null;
+            S3ObjectInputStream inputStream = s3Object.getObjectContent();
+            byte[] bytes = IOUtils.toByteArray(inputStream);
+
+            return new Asset(bytes, metadata.getContentType());
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
 
- */
+    //Eliminar un objeto del bucket
+    public void deleteObject(String key) {
+        s3Client.deleteObject(BUCKET, key);
+    }
 
+    //Construir una URL para los objetos publicos
+    public String getObjectURL(String key){
+        return String.format("https://%s.s3.amazonaws.com/%s", BUCKET, key);
+    }
 }
