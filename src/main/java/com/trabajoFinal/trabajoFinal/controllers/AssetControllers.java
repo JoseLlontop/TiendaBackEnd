@@ -17,7 +17,6 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:5173")
 public class AssetControllers {
 
-
     @Autowired
     private S3Service s3service;
 

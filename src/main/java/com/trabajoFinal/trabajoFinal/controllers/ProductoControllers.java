@@ -22,11 +22,16 @@ public class ProductoControllers {
 
     @GetMapping("/api/productos")
     public List<Producto> getAll(){
+        return service.getAll();
+    }
+
+   /*@GetMapping("/api/productos")
+    public List<Producto> getAll(){
         return service.getAll()
                 .stream()
                 .peek(productos -> productos.setImagenURL(s3Service.getObjectURL(productos.getImagen())))
                 .collect(Collectors.toList());
-    }
+    }*/
 
     @GetMapping("/api/productos/{id}")
     public Producto getById(@PathVariable int id){
@@ -39,11 +44,11 @@ public class ProductoControllers {
     }
 
     @PostMapping("/api/productos")
-    public Producto save(@RequestBody Producto producto){
+    public void save(@RequestBody Producto producto){
         service.save(producto);
 
-        producto.setImagenURL(s3Service.getObjectURL(producto.getImagen()));
-        return producto;
+       /* producto.setImagenURL(s3Service.getObjectURL(producto.getImagen()));
+        return producto;*/
     }
 
     @PutMapping("/api/productos/{id}")
