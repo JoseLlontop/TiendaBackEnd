@@ -11,7 +11,7 @@
 	<groupId>com.trabajoFinal</groupId>
 	<artifactId>trabajoFinal</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>trabajoFinal</name>
 	<description>Trabajo para Desarrollo de Software</description>
 	<properties>
@@ -62,12 +62,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.68</version>
 		</dependency>
 
 		<!-- Jackson para el mapeo de objetos JSON -->
